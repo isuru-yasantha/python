@@ -1,0 +1,30 @@
+spConnections:
+  ServiceNowSP:
+    enabled: true
+    id: "ServiceNowSP"
+    entityID: "A"
+    RSA: Never
+    signingRef: true
+    acs_urls: 
+      - url: "https://abc.com/ph"
+        isDefault: "true"
+        index: 0
+      - url: "https://abca.com/ph"
+        isDefault: "false"
+        index: 1
+    messageCustomizations:
+      contextName: assertion
+      messageExpression: '#AssertionType.getSubject().getSubjectConfirmationArray(0).getSubjectConfirmationData().setRecipient(\"k/navpage.do\")'
+    coreAttributes:
+      - nameFormat: urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified
+        name: SAML_SUBJECT
+        attributeContractFulfillment: 
+          sourceType: AUTHENTICATION_POLICY_CONTRACT
+          value: mail
+    extendedAttributes:
+      - nameFormat: urn:oasis:names:tc:SAML:2.0:attrname-format:basic
+        name: email
+        attributeContractFulfillment: 
+          sourceType: AUTHENTICATION_POLICY_CONTRACT
+          value: mail
+#file

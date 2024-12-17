@@ -1,0 +1,45 @@
+spConnections:
+  TomcatAWSNPSAML:
+    enabled: true
+    id: "TomcatAWSNPSAML"
+    entityID: "TomcatAWSNPSAML"
+    RSA: Never
+    acs_url: "https://tomcat.com/app/echo.jsp"
+    signingRef: true
+    coreAttributes:
+      - nameFormat: urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified
+        name: SAML_SUBJECT
+        attributeContractFulfillment: 
+          sourceType: AUTHENTICATION_POLICY_CONTRACT
+          value: subject
+    extendedAttributes:
+      - nameFormat: urn:oasis:names:tc:SAML:2.0:attrname-format:basic
+        name: mail
+        attributeContractFulfillment: 
+          sourceType: AUTHENTICATION_POLICY_CONTRACT
+          value: mail
+      - nameFormat: urn:oasis:names:tc:SAML:2.0:attrname-format:basic
+        name: givenName
+        attributeContractFulfillment: 
+          sourceType: AUTHENTICATION_POLICY_CONTRACT
+          value: givenName
+      - nameFormat: urn:oasis:names:tc:SAML:2.0:attrname-format:basic
+        name: familyName
+        attributeContractFulfillment: 
+          sourceType: AUTHENTICATION_POLICY_CONTRACT
+          value: sn
+      - nameFormat: urn:oasis:names:tc:SAML:2.0:attrname-format:basic
+        name: employeeId
+        attributeContractFulfillment: 
+          sourceType: AUTHENTICATION_POLICY_CONTRACT
+          value: employeeNumber
+      - nameFormat: urn:oasis:names:tc:SAML:2.0:attrname-format:unspecified
+        name: isMemberOf
+        attributeContractFulfillment: 
+          sourceType: AUTHENTICATION_POLICY_CONTRACT
+          value: isMemberOf
+      - nameFormat: urn:oasis:names:tc:SAML:2.0:attrname-format:unspecified
+        name: memberOf
+        attributeContractFulfillment: 
+          sourceType: AUTHENTICATION_POLICY_CONTRACT
+          value: memberOf

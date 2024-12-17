@@ -1,0 +1,38 @@
+spConnections:
+  TPRMSP:
+    enabled: true
+    id: "C"
+    entityID: "C"
+    RSA: Never
+    signingRef: true
+    acs_urls: 
+      - url: "https://abc.com"
+        isDefault: "true"
+        index: 0
+      - url: "https://abc.com/c"
+        isDefault: "false"
+        index: 1
+    messageCustomizations:
+      contextName: assertion
+      messageExpression: '#AssertionType.getConditions().getAudienceRestrictionArray(0).removeAudience(0),#AssertionType.getSubject().getSubjectConfirmationArray(0).getSubjectConfirmationData().setRecipient(\"https://uat.service-now.com/navpage.do\"),#AssertionType.getConditions().getAudienceRestrictionArray(0).addAudience(\"https://uat.service-now.com\")'
+    coreAttributes:
+      - nameFormat: urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified
+        name: SAML_SUBJECT
+        attributeContractFulfillment: 
+          sourceType: AUTHENTICATION_POLICY_CONTRACT
+          value: mail
+    extendedAttributes:
+      - nameFormat: urn:oasis:names:tc:SAML:2.0:attrname-format:basic
+        name: email
+        attributeContractFulfillment: 
+          sourceType: AUTHENTICATION_POLICY_CONTRACT
+          value: mail
+      - nameFormat: urn:oasis:names:tc:SAML:2.0:attrname-format:basic
+        name: identityType
+        attributeContractFulfillment: 
+          sourceType: AUTHENTICATION_POLICY_CONTRACT
+          value: identityType
+    authPolicyContract: ExternalUserAuthentication
+    issuance_criteria:
+      - errorResult: "Not a TPRM user. Please contact TPRM application team to get access or"
+        expression: "#this.get('mapped.identityType').toString().matches('TPRM')"

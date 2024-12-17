@@ -1,0 +1,212 @@
+{
+  "type": "SP",
+  "id": "{{ item.value.id }}",
+  "name": "{{ item.value.id if item.value.name is not defined else item.value.name  }}",
+  "entityId": "{{ item.value.entityID }}",
+  "active": true,
+  "contactInfo": {},
+  "loggingMode": "STANDARD",
+  "defaultVirtualEntityId": "{{ default_saml2_idp_entity_id }}",
+  "virtualEntityIds": [
+    "{{ default_saml2_idp_entity_id }}"
+  ],
+  "licenseConnectionGroup": "",
+  "credentials": {
+    {% if item.value.certs is defined %}
+    "certs":
+      {{ item.value.certs }}
+    ,
+    {% endif %}
+    "signingSettings": {
+      "signingKeyPairRef": {
+        "id": "{{ keypairsSigning.pingfedsigningnew.id if item.value.signingRef is defined and item.value.signingRef is true else "pingfedsigning" }}"
+      },
+    "includeCertInSignature": true,
+    "includeRawKeyInSignature": false,
+    "algorithm": "SHA256withRSA"
+    }
+  },
+  {% if zone == "pz" %}
+  "extendedProperties": {
+      "RSA": {
+        "values": [
+          "{{ item.value.RSA if item.value.RSA is defined else "ALWAYS" }}"
+        ]
+      }
+  },
+  {% elif zone == "coz" and item.value.RSA is defined %}
+    "extendedProperties": {
+      "RSA": {
+        "values": [
+          "{{ item.value.RSA }}"
+        ]
+      }
+  },
+  {% endif %}
+  {% if item.value.MSAuth is defined %}
+  "extendedProperties": {
+      "MSAuth": {
+        "values": [
+          "{{ item.value.MSAuth }}"
+        ]
+      }
+  },
+  {% endif %}
+  "spBrowserSso": {
+    "protocol": "SAML20",
+    "enabledProfiles": [
+      "IDP_INITIATED_SSO",
+      "SP_INITIATED_SSO"
+    ],
+    "incomingBindings": [
+      "POST",
+      "REDIRECT"
+    ],
+    "messageCustomizations": [
+      {% if item.value.messageCustomizations is defined %}
+      {
+        "contextName": "{{ item.value.messageCustomizations.contextName }}",
+        "messageExpression": "{{ item.value.messageCustomizations.messageExpression }}"
+      }
+      {% endif %}
+    ],
+    "ssoServiceEndpoints": [
+      {% if item.value.acs_urls is defined %}
+        {% for element in item.value.acs_urls %}
+      {
+        "binding": "POST",
+        "url": "{{ element.url }}",
+        "isDefault": "{{ element.isDefault }}",
+        "index": "{{ element.index }}"
+      {{ "}," if not loop.last else "}" }}
+        {% endfor %}
+      {% elif item.value.acs_url is defined %}
+      {
+        "binding": "POST",
+        "url": "{{ item.value.acs_url }}",
+        "isDefault": true,
+        "index": 1
+      }
+      {% endif %}
+    ],
+    "signAssertions": true,
+    "signResponseAsRequired": true,
+    "spSamlIdentityMapping": "STANDARD",
+    "requireSignedAuthnRequests": {{ 'true' if item.value.certs is defined else 'false' }},
+    "assertionLifetime": {
+      "minutesBefore": 5,
+      "minutesAfter": 5
+    },
+    "encryptionPolicy": {
+      "encryptAssertion": false,
+      "encryptSloSubjectNameId": false,
+      "sloSubjectNameIDEncrypted": false,
+      "encryptedAttributes": []
+    },
+    "attributeContract": {
+      "coreAttributes": [
+        {% if item.value.coreAttributes is defined %}
+        {% for element in item.value.coreAttributes %}
+        {
+          "name": "{{ element.name }}",
+          "nameFormat": "{{ element.nameFormat }}"
+        {{ "}," if not loop.last else "}" }}
+        {% endfor %}
+        {% else %}
+          {
+          "name": "SAML_SUBJECT",
+          "nameFormat": "urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified"
+          }
+        {% endif %}
+      ],
+      "extendedAttributes": [
+        {% if item.value.extendedAttributes is defined %}
+        {% for element in item.value.extendedAttributes %}
+        {
+          "name": "{{ element.name }}",
+          "nameFormat": "{{ element.nameFormat if element.nameFormat is defined else "urn:oasis:names:tc:SAML:2.0:attrname-format:unspecified"  }}"
+        {{ "}," if not loop.last else "}" }}
+        {% endfor %}
+        {% endif %}
+      ]
+    },
+    "adapterMappings": [],
+    "authenticationPolicyContractAssertionMappings": [
+      {
+        "attributeSources": [
+    {% if item.value.source is defined %}
+    {% if item.value.source == "AD" %}
+          {
+            "type": "LDAP",
+            "dataStoreRef": {
+              "id": "LDAP-{{ ad_domain_id }}"
+            },
+            "id": "AD",
+            "description": "AD",
+            "baseDn": "{{ ad_base_dn }}",
+            "searchScope": "SUBTREE",
+            "searchFilter": "sAMAccountName=${subject}",
+            "searchAttributes": [
+              "c",
+              "co",
+              "Subject DN"
+            ],
+            "binaryAttributeSettings": {},
+            "memberOfNestedGroup": false
+          }
+    {% endif %}
+    {% endif %}
+        ],
+        "attributeContractFulfillment": {
+          {% if item.value.extendedAttributes is defined %}
+          {% for element in item.value.extendedAttributes %}
+          "{{ element.name }}": {
+            "source": {
+              "type": "{{ element.attributeContractFulfillment.sourceType if element.attributeContractFulfillment.sourceType is defined else "AUTHENTICATION_POLICY_CONTRACT" }}"
+            },
+            "value": "{{ element.attributeContractFulfillment.value }}"
+          },
+          {% endfor %}
+          {% endif %}
+          {% if item.value.coreAttributes is defined %}
+          {% for element in item.value.coreAttributes %}
+          "{{ element.name }}": {
+            "source": {
+              "type": "{{ element.attributeContractFulfillment.sourceType if element.attributeContractFulfillment.sourceType is defined else "AUTHENTICATION_POLICY_CONTRACT" }}"
+            },
+            "value": "{{ element.attributeContractFulfillment.value }}"
+          {{ "}," if not loop.last else "}" }}
+          {% endfor %}
+          {% else %}
+          "SAML_SUBJECT": {
+            "source": {
+              "type": "AUTHENTICATION_POLICY_CONTRACT"
+            },
+            "value": "subject"
+          }
+          {% endif %}
+        },
+        "issuanceCriteria": {
+          "conditionalCriteria": [],
+          "expressionCriteria": [
+                  {% if item.value.issuance_criteria is defined %}
+                    {% for criterion in item.value.issuance_criteria %}
+                    {
+                      "errorResult": {{ criterion.errorResult | to_json }},
+                      "expression": {{ criterion.expression | to_json }}
+                    }{{ "," if not loop.last else "" }}
+                    {% endfor %}
+                  {% endif %}
+                  ]
+        },
+        "authenticationPolicyContractRef": {
+          "id": "{{ item.value.authPolicyContract if item.value.authPolicyContract is defined else "StaffAuthentication" }}"
+        },
+        "restrictVirtualEntityIds": false,
+        "restrictedVirtualEntityIds": [],
+        "abortSsoTransactionAsFailSafe": false
+      }
+    ]
+  },
+  "connectionTargetType": "STANDARD"
+}
