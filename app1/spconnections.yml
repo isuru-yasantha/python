@@ -27,3 +27,5 @@ spConnections:
         attributeContractFulfillment: 
           sourceType: AUTHENTICATION_POLICY_CONTRACT
           value: mail
+
+#applying changes

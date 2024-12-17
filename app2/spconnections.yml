@@ -43,3 +43,4 @@ spConnections:
         attributeContractFulfillment: 
           sourceType: AUTHENTICATION_POLICY_CONTRACT
           value: memberOf
+#applying changes
